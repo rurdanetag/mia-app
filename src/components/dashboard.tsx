@@ -54,7 +54,7 @@ const Dashboard = ({ userBalance, bsBalance, transactionHistory }: DashboardProp
 
     return (
         <div className="space-y-6">
-            <h1 className="text-3xl font-bold font-headline text-gray-800">Dashboard de M.I.A.</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold font-headline text-gray-800">Dashboard de M.I.A.</h1>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -62,7 +62,7 @@ const Dashboard = ({ userBalance, bsBalance, transactionHistory }: DashboardProp
                         <Wallet className="h-6 w-6 text-primary" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-4xl font-bold font-headline text-primary">${userBalance.toFixed(2)}</div>
+                        <div className="text-3xl sm:text-4xl font-bold font-headline text-primary">${userBalance.toFixed(2)}</div>
                     </CardContent>
                 </Card>
                 <Card>
@@ -71,19 +71,19 @@ const Dashboard = ({ userBalance, bsBalance, transactionHistory }: DashboardProp
                         <Landmark className="h-6 w-6 text-accent" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-4xl font-bold font-headline text-accent">Bs {bsBalance.toLocaleString('es-VE', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+                        <div className="text-3xl sm:text-4xl font-bold font-headline text-accent">Bs {bsBalance.toLocaleString('es-VE', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
                     </CardContent>
                 </Card>
             </div>
             <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
+                <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div>
                         <CardTitle>Historial de Transacciones</CardTitle>
                         <CardDescription>Tus movimientos más recientes.</CardDescription>
                     </div>
                     <Dialog>
                         <DialogTrigger asChild>
-                            <Button variant="outline" onClick={onAnalyze} disabled={loadingAnalysis}>
+                            <Button variant="outline" onClick={onAnalyze} disabled={loadingAnalysis} className="w-full sm:w-auto">
                                 {loadingAnalysis ? (
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                 ) : (
@@ -133,8 +133,8 @@ const Dashboard = ({ userBalance, bsBalance, transactionHistory }: DashboardProp
                                 {transactionHistory.length > 0 ? transactionHistory.map(tx => (
                                     <TableRow key={tx.id}>
                                         <TableCell>
-                                            <div className="font-medium">{tx.type}</div>
-                                            <div className="text-sm text-muted-foreground">{tx.description}</div>
+                                            <div className="font-medium break-words">{tx.type}</div>
+                                            <div className="text-sm text-muted-foreground break-words">{tx.description}</div>
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <Badge variant={tx.amount >= 0 ? 'default' : 'destructive'} className={`${tx.currency === 'USDT' ? 'bg-primary/20 text-primary border-primary/30' : (tx.amount >= 0 ? 'bg-green-500/20 text-green-700 border-green-500/30' : 'bg-red-500/20 text-red-700 border-red-500/30')} font-mono`}>

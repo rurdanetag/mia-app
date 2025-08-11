@@ -84,7 +84,7 @@ const SubastaPage = ({ processTransaction, userBalance, bsBalance, bcvRates }: S
     return (
         <div className="max-w-4xl mx-auto space-y-6">
             <div className="text-center">
-                <h1 className="text-3xl font-bold font-headline text-gray-800">Mercado de Subasta M.I.A.</h1>
+                <h1 className="text-2xl sm:text-3xl font-bold font-headline text-gray-800">Mercado de Subasta M.I.A.</h1>
                 <p className="text-muted-foreground">Intercambia tus divisas de forma segura y transparente.</p>
             </div>
 
@@ -99,7 +99,7 @@ const SubastaPage = ({ processTransaction, userBalance, bsBalance, bcvRates }: S
                             id="rate"
                             type="number"
                             step="0.01"
-                            className="text-5xl font-extrabold tracking-wide mb-2 font-headline text-center h-auto bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                            className="text-4xl sm:text-5xl font-extrabold tracking-wide mb-2 font-headline text-center h-auto bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
                             placeholder="0.00"
                             value={rate}
                             onChange={handleRateChange}

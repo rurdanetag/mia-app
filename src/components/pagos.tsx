@@ -80,7 +80,7 @@ const PagosPage = ({ processTransaction, userBalance, bsBalance, bcvRates }: Pag
     return (
         <div className="max-w-xl mx-auto space-y-6">
             <div className="text-center">
-                <h1 className="text-3xl font-bold font-headline text-gray-800">Pagar Servicios</h1>
+                <h1 className="text-2xl sm:text-3xl font-bold font-headline text-gray-800">Pagar Servicios</h1>
                 <p className="text-muted-foreground">Realiza tus pagos de facturas de forma fácil.</p>
             </div>
             

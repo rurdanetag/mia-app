@@ -97,11 +97,11 @@ const CardPage = ({ processTransaction, userBalance, bsBalance, bcvRates }: Card
     return (
         <div className="max-w-xl mx-auto space-y-6">
             <div className="text-center">
-                <h1 className="text-3xl font-bold font-headline text-gray-800">Mi Tarjeta de Débito M.I.A.</h1>
+                <h1 className="text-2xl sm:text-3xl font-bold font-headline text-gray-800">Mi Tarjeta de Débito M.I.A.</h1>
             </div>
             
              {/* Premium Card Design */}
-            <div className="relative bg-black text-white w-full aspect-[1.586] rounded-xl shadow-2xl flex flex-col justify-between p-6 transform transition-transform duration-500 hover:scale-105 overflow-hidden group">
+            <div className="relative bg-black text-white w-full aspect-[1.586] rounded-xl shadow-2xl flex flex-col justify-between p-4 sm:p-6 transform transition-transform duration-500 hover:scale-105 overflow-hidden group">
                  {/* Glossy Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
                  {/* World Map Background */}
@@ -112,10 +112,10 @@ const CardPage = ({ processTransaction, userBalance, bsBalance, bcvRates }: Card
 
                 <div className="relative z-10 flex justify-between items-start">
                      {/* M.I.A. Logo with relief */}
-                    <h2 className="text-3xl font-bold font-headline" style={{ textShadow: '0px 1px 2px rgba(0,0,0,0.5), 0px 0px 1px rgba(255,255,255,0.3)' }}>M.I.A</h2>
+                    <h2 className="text-2xl sm:text-3xl font-bold font-headline" style={{ textShadow: '0px 1px 2px rgba(0,0,0,0.5), 0px 0px 1px rgba(255,255,255,0.3)' }}>M.I.A</h2>
 
                     {/* Chip */}
-                    <div className="w-12 h-10 bg-gradient-to-br from-gray-400 to-gray-600 rounded-md shadow-inner">
+                    <div className="w-10 sm:w-12 h-8 sm:h-10 bg-gradient-to-br from-gray-400 to-gray-600 rounded-md shadow-inner">
                         <div className="w-full h-full border border-gray-500/50 rounded-md grid grid-cols-2 gap-px p-1">
                             <div className="border-r border-b border-gray-500/50"></div>
                             <div className="border-b border-gray-500/50"></div>
@@ -126,7 +126,7 @@ const CardPage = ({ processTransaction, userBalance, bsBalance, bcvRates }: Card
                 </div>
 
                 <div className="relative z-10 text-center">
-                    <p className="font-mono text-2xl sm:text-3xl tracking-widest" style={{ textShadow: '0px 1px 2px rgba(0,0,0,0.5)' }}>
+                    <p className="font-mono text-xl sm:text-3xl tracking-widest" style={{ textShadow: '0px 1px 2px rgba(0,0,0,0.5)' }}>
                         4242 1234 5678 9010
                     </p>
                 </div>
@@ -134,14 +134,14 @@ const CardPage = ({ processTransaction, userBalance, bsBalance, bcvRates }: Card
                 <div className="relative z-10 flex justify-between items-end" style={{ textShadow: '0px 1px 2px rgba(0,0,0,0.5)' }}>
                     <div>
                         <p className="text-xs opacity-70 tracking-wider">TITULAR</p>
-                        <p className="font-medium tracking-wider">USUARIO DE M.I.A.</p>
+                        <p className="font-medium tracking-wider text-sm sm:text-base">USUARIO DE M.I.A.</p>
                     </div>
                     <div className="flex items-center gap-1">
-                        <div className="w-9 h-6 relative">
-                            <div className="w-6 h-6 rounded-full bg-red-600/80 absolute right-0"></div>
-                            <div className="w-6 h-6 rounded-full bg-yellow-500/80 absolute left-0 mix-blend-screen"></div>
+                        <div className="w-8 sm:w-9 h-5 sm:h-6 relative">
+                            <div className="w-5 sm:w-6 h-5 sm:h-6 rounded-full bg-red-600/80 absolute right-0"></div>
+                            <div className="w-5 sm:w-6 h-5 sm:h-6 rounded-full bg-yellow-500/80 absolute left-0 mix-blend-screen"></div>
                         </div>
-                        <p className="font-semibold text-sm">mastercard</p>
+                        <p className="font-semibold text-xs sm:text-sm">mastercard</p>
                     </div>
                 </div>
             </div>
@@ -298,5 +298,3 @@ const CardPage = ({ processTransaction, userBalance, bsBalance, bcvRates }: Card
 };
 
 export default CardPage;
-
-    

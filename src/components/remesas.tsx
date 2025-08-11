@@ -36,7 +36,7 @@ const RemesasPage = ({ processTransaction, userBalance, bsBalance }: RemesasPage
         const numericAmount = parseFloat(remesaData.amountToSend);
         if (!numericAmount || numericAmount <= 0 || numericAmount > userBalance) return;
         
-        const commissionRate = remesaData.paymentMethod === 'app-balance' ? 0 : 0.01;
+        const commissionRate = remesa.paymentMethod === 'app-balance' ? 0 : 0.01;
         const commission = numericAmount * commissionRate;
         const finalAmount = numericAmount - commission;
         setAmountReceived(finalAmount);
@@ -117,7 +117,7 @@ const RemesasPage = ({ processTransaction, userBalance, bsBalance }: RemesasPage
                     <div className="flex justify-between"><span className="text-muted-foreground">Monto Enviado:</span><span className="font-semibold">${parseFloat(remesaData.amountToSend).toFixed(2)} USDT</span></div>
                     <div className="flex justify-between text-base"><span className="text-muted-foreground">Monto a Recibir:</span><span className="font-bold text-green-600">${amountReceived.toFixed(2)} USDT</span></div>
                 </div>
-                <div className="flex gap-4 pt-4">
+                <div className="flex flex-col sm:flex-row gap-4 pt-4">
                     <Button variant="outline" onClick={() => setStep('form')} className="w-full">
                         <ArrowLeft className="mr-2 h-4 w-4" /> Volver
                     </Button>
@@ -147,7 +147,7 @@ const RemesasPage = ({ processTransaction, userBalance, bsBalance }: RemesasPage
     return (
         <div className="max-w-2xl mx-auto space-y-6">
             <div className="text-center">
-                <h1 className="text-3xl font-bold font-headline text-gray-800">Enviar Remesas con M.I.A.</h1>
+                <h1 className="text-2xl sm:text-3xl font-bold font-headline text-gray-800">Enviar Remesas con M.I.A.</h1>
             </div>
             {step === 'form' && renderForm()}
             {step === 'confirm' && renderConfirm()}

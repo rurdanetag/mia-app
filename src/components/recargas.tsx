@@ -173,7 +173,7 @@ const RecargasPage = (props: RecargasPageProps) => {
     return (
         <div className="max-w-xl mx-auto space-y-6">
             <div className="text-center">
-                <h1 className="text-3xl font-bold font-headline text-gray-800">Recargar Saldo en Bolívares</h1>
+                <h1 className="text-2xl sm:text-3xl font-bold font-headline text-gray-800">Recargar Saldo en Bolívares</h1>
                 <p className="text-muted-foreground">Añade fondos a tu cuenta desde un banco o con tu tarjeta.</p>
             </div>
             <Card>
@@ -209,5 +209,3 @@ const RecargasPage = (props: RecargasPageProps) => {
 };
 
 export default RecargasPage;
-
-    
