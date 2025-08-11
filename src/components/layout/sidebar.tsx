@@ -39,7 +39,7 @@ const AppSidebar = ({ navigateTo, currentPage, userBalance, bsBalance }: AppSide
                     <p className="text-sm text-muted-foreground">Saldo USDT</p>
                     <p className="text-2xl font-bold font-headline">${userBalance.toFixed(2)}</p>
                     <p className="text-sm text-muted-foreground mt-2">Saldo Bolívares</p>
-                    <p className="text-lg font-semibold">Bs {bsBalance.toFixed(2)}</p>
+                    <p className="text-lg font-semibold">Bs {bsBalance.toLocaleString('es-VE', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
                 </div>
 
                 <SidebarMenu className="mt-4">

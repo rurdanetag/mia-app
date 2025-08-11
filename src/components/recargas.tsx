@@ -7,17 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2 } from 'lucide-react';
-import type { Transaction } from '@/lib/types';
-import { db } from '@/lib/firebase';
-import { doc, runTransaction, collection, addDoc } from 'firebase/firestore';
 
 interface RecargasPageProps {
-    userId: string;
-    showSuccessModal: (message: string, transaction: Transaction) => void;
-    showErrorModal: (message: string) => void;
+    processTransaction: (newUsdtAmount: number, newBsAmount: number, transactionDetails: any) => Promise<boolean>;
+    userBalance: number;
+    bsBalance: number;
 }
 
-const RecargasPage = ({ userId, showSuccessModal, showErrorModal }: RecargasPageProps) => {
+const RecargasPage = ({ processTransaction, bsBalance, userBalance }: RecargasPageProps) => {
     const [amount, setAmount] = useState('');
     const [bank, setBank] = useState('');
     const [reference, setReference] = useState('');
@@ -25,58 +22,26 @@ const RecargasPage = ({ userId, showSuccessModal, showErrorModal }: RecargasPage
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        const numericAmount = parseFloat(amount);
-        if (!numericAmount || numericAmount <= 0) {
-            showErrorModal("Por favor, introduce un monto válido.");
-            return;
-        }
-        if (!bank || !reference) {
-            showErrorModal("Por favor, completa todos los campos del formulario.");
-            return;
-        }
-
         setIsLoading(true);
+        const numericAmount = parseFloat(amount);
+        
+        const success = await processTransaction(
+            userBalance, // El saldo en USDT no cambia
+            bsBalance + numericAmount,
+            {
+                type: 'Recarga Nacional',
+                description: `Desde ${bank || 'banco'} | Ref: ${reference || 'N/A'}`,
+                amount: numericAmount,
+                currency: 'BS',
+            }
+        );
 
-        try {
-            const userDocRef = doc(db, 'users', userId);
-            const transactionsColRef = collection(db, 'users', userId, 'transactions');
-
-            // Using a transaction to ensure atomicity
-            const newTransaction = await runTransaction(db, async (firestoreTransaction) => {
-                const userDoc = await firestoreTransaction.get(userDocRef);
-                if (!userDoc.exists()) {
-                    throw new Error("El documento del usuario no existe.");
-                }
-
-                const currentBalance = userDoc.data().bsBalance || 0;
-                const newBalance = currentBalance + numericAmount;
-                
-                firestoreTransaction.update(userDocRef, { bsBalance: newBalance });
-
-                const transactionData = {
-                    type: 'Recarga Nacional',
-                    description: `Desde ${bank} | Ref: ${reference}`,
-                    amount: numericAmount,
-                    currency: 'BS' as 'BS',
-                    date: new Date().toISOString(),
-                };
-                
-                const newTransactionRef = await addDoc(transactionsColRef, transactionData);
-                return { ...transactionData, id: newTransactionRef.id };
-            });
-
-            showSuccessModal('¡Recarga exitosa!', newTransaction);
+        if (success) {
             setAmount('');
             setBank('');
             setReference('');
-
-        } catch (error) {
-            console.error("Error al procesar la recarga:", error);
-            const errorMessage = error instanceof Error ? error.message : "Ocurrió un error desconocido.";
-            showErrorModal(`Error al procesar la recarga: ${errorMessage}`);
-        } finally {
-            setIsLoading(false);
         }
+        setIsLoading(false);
     };
     
     return (
@@ -89,14 +54,14 @@ const RecargasPage = ({ userId, showSuccessModal, showErrorModal }: RecargasPage
                 <CardHeader>
                     <CardTitle>Reportar una Recarga</CardTitle>
                     <CardDescription>
-                        Completa los detalles de tu transferencia para que sea abonada a tu saldo.
+                        Completa los detalles de tu transferencia para que sea abonada a tu saldo (simulación).
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
                             <Label htmlFor="bank">Banco de Origen</Label>
-                             <Select value={bank} onValueChange={setBank}>
+                             <Select value={bank} onValueChange={setBank} required>
                                 <SelectTrigger id="bank" className="w-full mt-1">
                                     <SelectValue placeholder="Seleccione un banco" />
                                 </SelectTrigger>
@@ -134,7 +99,7 @@ const RecargasPage = ({ userId, showSuccessModal, showErrorModal }: RecargasPage
                                 required
                             />
                         </div>
-                        <Button type="submit" className="w-full" disabled={isLoading}>
+                        <Button type="submit" className="w-full" disabled={isLoading || !amount || !bank || !reference}>
                             {isLoading ? <Loader2 className="animate-spin" /> : 'Confirmar Recarga'}
                         </Button>
                     </form>
