@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
-import { CheckCircle2, ArrowLeft, ArrowRight } from "lucide-react";
+import { CheckCircle2, ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
 
 interface RemesasPageProps {
     processTransaction: (newUsdtAmount: number, newBsAmount: number, transactionDetails: any) => Promise<boolean>;
@@ -18,10 +18,8 @@ interface RemesasPageProps {
 
 const RemesasPage = ({ processTransaction, userBalance, bsBalance }: RemesasPageProps) => {
     const [step, setStep] = useState<'form' | 'confirm' | 'result'>('form');
+    const [isLoading, setIsLoading] = useState(false);
     const [remesaData, setRemesaData] = useState({ recipientUser: '', amountToSend: '', paymentMethod: 'app-balance' });
-    const [cardData, setCardData] = useState({ cardNumber: '', cardHolder: '', expiry: '', cvc: '' });
-    const [bankData, setBankData] = useState({ bankName: '', accountNumber: '', accountHolder: '' });
-    const [saveDetails, setSaveDetails] = useState(false);
     
     const recipientInfo = { name: 'Ana García', document: 'V-12.345.678', email: 'ana.garcia@email.com' };
     const [amountReceived, setAmountReceived] = useState(0);
@@ -34,9 +32,9 @@ const RemesasPage = ({ processTransaction, userBalance, bsBalance }: RemesasPage
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         const numericAmount = parseFloat(remesaData.amountToSend);
-        if (!numericAmount || numericAmount <= 0 || numericAmount > userBalance) return;
+        if (!numericAmount || numericAmount <= 0) return;
         
-        const commissionRate = remesa.paymentMethod === 'app-balance' ? 0 : 0.01;
+        const commissionRate = remesaData.paymentMethod === 'app-balance' ? 0 : 0.01;
         const commission = numericAmount * commissionRate;
         const finalAmount = numericAmount - commission;
         setAmountReceived(finalAmount);
@@ -44,6 +42,7 @@ const RemesasPage = ({ processTransaction, userBalance, bsBalance }: RemesasPage
     };
 
     const handleConfirm = async () => {
+        setIsLoading(true);
         const numericAmount = parseFloat(remesaData.amountToSend);
         const success = await processTransaction(
             userBalance - numericAmount,
@@ -58,12 +57,15 @@ const RemesasPage = ({ processTransaction, userBalance, bsBalance }: RemesasPage
         if (success) {
             setStep('result');
         }
+        setIsLoading(false);
     };
     
     const resetForm = () => {
         setRemesaData({ recipientUser: '', amountToSend: '', paymentMethod: 'app-balance' });
         setStep('form');
     }
+    
+    const hasSufficientBalance = userBalance >= parseFloat(remesaData.amountToSend || '0');
 
     const renderForm = () => (
         <Card>
@@ -94,8 +96,8 @@ const RemesasPage = ({ processTransaction, userBalance, bsBalance }: RemesasPage
                            ))}
                         </RadioGroup>
                     </div>
-                    <Button type="submit" className="w-full" disabled={!remesaData.amountToSend || !remesaData.recipientUser || parseFloat(remesaData.amountToSend) > userBalance}>
-                        {parseFloat(remesaData.amountToSend) > userBalance ? 'Saldo USDT Insuficiente' : <>Enviar Remesa <ArrowRight className="ml-2 h-4 w-4" /></>}
+                    <Button type="submit" className="w-full" disabled={!remesaData.amountToSend || !remesaData.recipientUser || !hasSufficientBalance}>
+                        {!hasSufficientBalance ? 'Saldo USDT Insuficiente' : <>Siguiente <ArrowRight className="ml-2 h-4 w-4" /></>}
                     </Button>
                 </form>
             </CardContent>
@@ -118,11 +120,11 @@ const RemesasPage = ({ processTransaction, userBalance, bsBalance }: RemesasPage
                     <div className="flex justify-between text-base"><span className="text-muted-foreground">Monto a Recibir:</span><span className="font-bold text-green-600">${amountReceived.toFixed(2)} USDT</span></div>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                    <Button variant="outline" onClick={() => setStep('form')} className="w-full">
+                    <Button variant="outline" onClick={() => setStep('form')} className="w-full" disabled={isLoading}>
                         <ArrowLeft className="mr-2 h-4 w-4" /> Volver
                     </Button>
-                    <Button onClick={handleConfirm} className="w-full bg-green-600 hover:bg-green-700">
-                        Confirmar Envío
+                    <Button onClick={handleConfirm} className="w-full" disabled={isLoading}>
+                        {isLoading ? <Loader2 className="animate-spin" /> : 'Confirmar Envío'}
                     </Button>
                 </div>
             </CardContent>

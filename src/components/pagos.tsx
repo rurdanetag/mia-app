@@ -58,7 +58,7 @@ const PagosPage = ({ processTransaction, userBalance, bsBalance, bcvRates }: Pag
             {
                 type: 'Pago de Servicio',
                 description: description,
-                amount: numericAmount,
+                amount: -numericAmount,
                 currency: 'BS',
                 usdtUsed: usdtUsed,
             }

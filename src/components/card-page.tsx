@@ -202,7 +202,7 @@ const CardPage = ({ processTransaction, userBalance, bsBalance, bcvRates }: Card
                     <Alert>
                         <Info className="h-4 w-4" />
                         <AlertDescription>
-                           La solicitud de tu primera tarjeta M.I.A. es <strong>gratuita</strong>. Las renovaciones o reemplazos tendrán un costo de 5 USDT, que se debitarán de tu saldo.
+                           La solicitud de tu primera tarjeta M.I.A. es <strong>gratuita</strong>. Las renovaciones o reemplazos tendrán un costo de 5 USDT.
                         </AlertDescription>
                     </Alert>
                     <Dialog open={isFormOpen} onOpenChange={(open) => { if (!open) { resetRequestForm(); } setIsFormOpen(open); }}>

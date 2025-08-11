@@ -1,9 +1,9 @@
 export type Transaction = {
-  id: string; // Changed to string to accommodate Firestore document IDs
+  id: string;
   type: string;
   description: string;
   amount: number;
-  date: string;
+  date: string; // ISO Date String
   currency: 'USDT' | 'BS';
   usdtUsed?: number;
 };
