@@ -41,7 +41,7 @@ const Dashboard = ({ userBalance, bsBalance, transactionHistory }: DashboardProp
             return;
         }
 
-        const result = await handleAnalyzeExpenses(bsTransactions);
+        const result = await handleAnalyzeExpenses(bsTransactions.map(tx => ({...tx, id: tx.id.toString() })));
 
         if (result.success && result.data) {
             setAnalysisResult(result.data);

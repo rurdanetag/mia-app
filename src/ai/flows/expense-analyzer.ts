@@ -12,7 +12,7 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const TransactionSchema = z.object({
-  id: z.number(),
+  id: z.string(),
   type: z.string(),
   description: z.string(),
   amount: z.number(),
