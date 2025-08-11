@@ -24,6 +24,15 @@ const Comprobante = ({ lastTransaction, navigateTo }: ComprobanteProps) => {
             </Card>
         );
     }
+
+    // Format date from ISO string to a more readable format
+    const formattedDate = new Date(lastTransaction.date).toLocaleString('es-VE', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+    });
     
     return (
         <div className="max-w-md mx-auto">
@@ -44,7 +53,7 @@ const Comprobante = ({ lastTransaction, navigateTo }: ComprobanteProps) => {
                         </div>
                         <div className="flex justify-between">
                             <span className="text-muted-foreground">Fecha:</span>
-                            <span className="font-semibold">{lastTransaction.date}</span>
+                            <span className="font-semibold">{formattedDate}</span>
                         </div>
                     </div>
                     <div className="flex justify-between items-center mt-4 border-t pt-4">

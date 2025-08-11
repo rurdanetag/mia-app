@@ -6,17 +6,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import Comprobante from './comprobante';
 
 interface CardPageProps {
     processTransaction: (newUsdtAmount: number, newBsAmount: number, transactionDetails: any) => boolean;
     userBalance: number;
     bsBalance: number;
     bcvRates: { dolar: number };
-    lastTransaction: Transaction | null;
 }
 
-const CardPage = ({ processTransaction, userBalance, bsBalance, bcvRates, lastTransaction }: CardPageProps) => {
+const CardPage = ({ processTransaction, userBalance, bsBalance, bcvRates }: CardPageProps) => {
     const [amount, setAmount] = useState('');
     const [merchant, setMerchant] = useState('');
 
@@ -27,11 +25,11 @@ const CardPage = ({ processTransaction, userBalance, bsBalance, bcvRates, lastTr
         
         const success = processTransaction(
             userBalance - usdtEquivalent,
-            bsBalance, // Assuming card payments are deducted from USDT via BS conversion at POS
+            bsBalance, // Card payments are deducted from USDT via BS conversion at POS
             {
                 type: 'Compra con Tarjeta',
                 description: merchant || 'Comercio Local',
-                amount: -numericAmount, // The charge is in BS
+                amount: -numericAmount, // The charge is in BS, but represented as a negative amount for history
                 currency: 'BS',
             }
         );

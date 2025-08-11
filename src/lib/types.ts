@@ -1,5 +1,5 @@
 export type Transaction = {
-  id: number;
+  id: string; // Changed to string to accommodate Firestore document IDs
   type: string;
   description: string;
   amount: number;

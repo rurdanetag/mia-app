@@ -32,12 +32,21 @@ const Dashboard = ({ userBalance, bsBalance, transactionHistory }: DashboardProp
         setAnalysisError(null);
         setAnalysisResult(null);
 
-        const result = await handleAnalyzeExpenses(transactionHistory);
+        // Filter for BS transactions for a more focused analysis
+        const bsTransactions = transactionHistory.filter(tx => tx.currency === 'BS');
+
+        if (bsTransactions.length === 0) {
+            setAnalysisError("No hay transacciones en Bolívares para analizar.");
+            setLoadingAnalysis(false);
+            return;
+        }
+
+        const result = await handleAnalyzeExpenses(bsTransactions);
 
         if (result.success && result.data) {
             setAnalysisResult(result.data);
         } else {
-            setAnalysisError(result.error || "An unknown error occurred.");
+            setAnalysisError(result.error || "Ocurrió un error desconocido.");
         }
         setLoadingAnalysis(false);
     };
@@ -79,14 +88,14 @@ const Dashboard = ({ userBalance, bsBalance, transactionHistory }: DashboardProp
                                 ) : (
                                     <BrainCircuit className="mr-2 h-4 w-4" />
                                 )}
-                                Analizar Gastos
+                                Analizar Gastos (Bs)
                             </Button>
                         </DialogTrigger>
                         <DialogContent className="sm:max-w-[625px]">
                             <DialogHeader>
                                 <DialogTitle className="text-2xl">Análisis de Gastos con IA</DialogTitle>
                                 <DialogDescription>
-                                    Resumen y recomendaciones basadas en tu historial de transacciones.
+                                    Resumen y recomendaciones basadas en tu historial de transacciones en Bolívares.
                                 </DialogDescription>
                             </DialogHeader>
                             <div className="py-4 space-y-4">

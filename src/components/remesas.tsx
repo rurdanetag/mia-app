@@ -42,9 +42,9 @@ const RemesasPage = ({ processTransaction, userBalance, bsBalance }: RemesasPage
 
     const handleConfirm = () => {
         const numericAmount = parseFloat(remesaData.amountToSend);
-        processTransaction(
+        const success = processTransaction(
             userBalance - numericAmount,
-            bsBalance, // Corrected from 0 to bsBalance to not affect it.
+            bsBalance,
             {
                 type: 'Remesa Enviada',
                 description: `A ${recipientInfo.name} | Método: ${remesaData.paymentMethod === 'app-balance' ? 'Saldo App' : 'Externo'}`,
@@ -52,7 +52,9 @@ const RemesasPage = ({ processTransaction, userBalance, bsBalance }: RemesasPage
                 currency: 'USDT',
             }
         );
-        setStep('result');
+        if (success) {
+            setStep('result');
+        }
     };
 
     const renderForm = () => (
