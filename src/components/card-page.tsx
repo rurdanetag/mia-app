@@ -6,6 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription, AlertTitle } from './ui/alert';
+import { Info } from 'lucide-react';
 
 interface CardPageProps {
     processTransaction: (newUsdtAmount: number, newBsAmount: number, transactionDetails: any) => Promise<boolean>;
@@ -147,6 +149,24 @@ const CardPage = ({ processTransaction, userBalance, bsBalance, bcvRates }: Card
                             {isLoading ? 'Procesando...' : 'Pagar con Tarjeta'}
                         </Button>
                     </form>
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>Solicitar Tarjeta Física</CardTitle>
+                    <CardDescription>Recibe tu tarjeta M.I.A. y úsala en cualquier parte del mundo.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <Alert>
+                        <Info className="h-4 w-4" />
+                        <AlertDescription>
+                            La solicitud de tu primera tarjeta M.I.A. es completamente <strong>gratuita</strong>. Las renovaciones o reemplazos tendrán un costo de 5 USDT, que se debitarán de tu saldo (en USDT o su equivalente en Bs.).
+                        </AlertDescription>
+                    </Alert>
+                    <Button className="w-full" disabled>
+                       Solicitar Tarjeta (Próximamente)
+                    </Button>
                 </CardContent>
             </Card>
         </div>
