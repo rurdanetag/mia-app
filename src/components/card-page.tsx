@@ -56,20 +56,47 @@ const CardPage = ({ processTransaction, userBalance, bsBalance, bcvRates }: Card
             <div className="text-center">
                 <h1 className="text-3xl font-bold font-headline text-gray-800">Mi Tarjeta de Débito M.I.A.</h1>
             </div>
-            <div className="bg-gradient-to-br from-primary to-accent text-primary-foreground p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
-                <p className="text-sm opacity-80">Número de Tarjeta (Ficticio)</p>
-                <p className="font-mono text-2xl tracking-widest mt-2 mb-4">4242 1234 5678 9010</p>
-                <div className="flex justify-between items-center">
-                    <div>
-                        <p className="text-sm opacity-80">Titular</p>
-                        <p className="font-bold">Usuario de M.I.A.</p>
+            
+            {/* Mastercard design */}
+            <div className="bg-gray-800 text-white w-full aspect-[1.586] rounded-xl shadow-lg flex flex-col justify-between p-6 transform transition-transform duration-300 hover:scale-105">
+                <div className="flex justify-between items-start">
+                    <h2 className="text-xl font-bold font-headline">M.I.A.</h2>
+                    {/* Chip */}
+                    <div className="w-12 h-10 bg-gradient-to-br from-yellow-300 to-yellow-500 rounded-md">
+                        <div className="w-full h-full border border-yellow-600/50 rounded-md grid grid-cols-2 gap-px p-1">
+                            <div className="border-r border-b border-yellow-600/50"></div>
+                            <div className="border-b border-yellow-600/50"></div>
+                            <div className="border-r border-yellow-600/50"></div>
+                            <div></div>
+                        </div>
                     </div>
+                </div>
+
+                <div className="text-center">
+                    <p className="font-mono text-2xl sm:text-3xl tracking-widest">
+                        4242 1234 5678 9010
+                    </p>
+                </div>
+                
+                <div className="flex justify-between items-end">
                     <div>
-                        <p className="text-sm opacity-80">Válido hasta</p>
-                        <p className="font-bold">12/28</p>
+                        <p className="text-xs opacity-70">TITULAR</p>
+                        <p className="font-medium tracking-wider">USUARIO DE M.I.A.</p>
+                    </div>
+                     <div className="flex items-center">
+                        <div className="flex-col text-right mr-4">
+                           <p className="text-xs opacity-70">VÁLIDO HASTA</p>
+                           <p className="font-medium tracking-wider">12/28</p>
+                        </div>
+                        {/* Mastercard Logo */}
+                        <div className="relative flex-shrink-0">
+                            <div className="w-12 h-8 bg-red-600 rounded-full"></div>
+                            <div className="w-12 h-8 bg-yellow-500 rounded-full absolute top-0 left-6 opacity-80 mix-blend-screen"></div>
+                        </div>
                     </div>
                 </div>
             </div>
+
             <Card>
                 <CardHeader>
                     <CardTitle>Simular un Pago</CardTitle>
