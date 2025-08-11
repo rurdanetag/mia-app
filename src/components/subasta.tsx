@@ -5,10 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { ArrowDown, ArrowUp } from 'lucide-react';
+import { ArrowDown, ArrowUp, Loader2 } from 'lucide-react';
 
 interface SubastaPageProps {
-    processTransaction: (newUsdtAmount: number, newBsAmount: number, transactionDetails: any) => boolean;
+    processTransaction: (newUsdtAmount: number, newBsAmount: number, transactionDetails: any) => Promise<boolean>;
     userBalance: number;
     bsBalance: number;
     bcvRates: { dolar: number, euro: number };
@@ -18,19 +18,26 @@ const SubastaPage = ({ processTransaction, userBalance, bsBalance, bcvRates }: S
     const [usdtAmount, setUsdtAmount] = useState('');
     const [bsAmount, setBsAmount] = useState('');
     const [rate, setRate] = useState(bcvRates.dolar.toFixed(2));
+    const [isLoadingBuy, setIsLoadingBuy] = useState(false);
+    const [isLoadingSell, setIsLoadingSell] = useState(false);
 
     const handleRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setRate(e.target.value);
     };
 
-    const handleBuyUSDT = (e: React.FormEvent) => {
+    const handleBuyUSDT = async (e: React.FormEvent) => {
         e.preventDefault();
+        setIsLoadingBuy(true);
         const numericBsAmount = parseFloat(bsAmount);
         const numericRate = parseFloat(rate);
+        if(!numericBsAmount || numericBsAmount <= 0 || !numericRate || numericRate <= 0) {
+            setIsLoadingBuy(false);
+            return;
+        }
         
         const convertedUSDT = numericBsAmount / numericRate;
         
-        const success = processTransaction(
+        const success = await processTransaction(
             userBalance + convertedUSDT,
             bsBalance - numericBsAmount,
             {
@@ -41,15 +48,22 @@ const SubastaPage = ({ processTransaction, userBalance, bsBalance, bcvRates }: S
             }
         );
         if(success) setBsAmount('');
+        setIsLoadingBuy(false);
     };
 
-    const handleSellUSDT = (e: React.FormEvent) => {
+    const handleSellUSDT = async (e: React.FormEvent) => {
         e.preventDefault();
+        setIsLoadingSell(true);
         const numericUsdtAmount = parseFloat(usdtAmount);
         const numericRate = parseFloat(rate);
+         if(!numericUsdtAmount || numericUsdtAmount <= 0 || !numericRate || numericRate <= 0) {
+            setIsLoadingSell(false);
+            return;
+        }
+
         const convertedBs = numericUsdtAmount * numericRate;
         
-        const success = processTransaction(
+        const success = await processTransaction(
             userBalance - numericUsdtAmount,
             bsBalance + convertedBs,
             {
@@ -60,10 +74,12 @@ const SubastaPage = ({ processTransaction, userBalance, bsBalance, bcvRates }: S
             }
         );
         if(success) setUsdtAmount('');
+        setIsLoadingSell(false);
     };
 
-    const isValidRate = !isNaN(parseFloat(rate)) && parseFloat(rate) >= bcvRates.dolar && parseFloat(rate) <= bcvRates.euro;
-    const isInvalidAndNotEmpty = !isValidRate && rate !== '';
+    const isValidRate = !isNaN(parseFloat(rate)) && parseFloat(rate) > 0;
+    const hasSufficientBs = bsBalance >= parseFloat(bsAmount || '0');
+    const hasSufficientUsdt = userBalance >= parseFloat(usdtAmount || '0');
 
     return (
         <div className="max-w-4xl mx-auto space-y-6">
@@ -72,41 +88,26 @@ const SubastaPage = ({ processTransaction, userBalance, bsBalance, bcvRates }: S
                 <p className="text-muted-foreground">Intercambia tus divisas de forma segura y transparente.</p>
             </div>
 
-            <Card className="bg-gradient-to-r from-primary to-accent text-primary-foreground text-center shadow-lg">
+            <Card className="text-center shadow-lg">
                 <CardHeader>
                     <CardTitle className="text-xl font-light">Tasa de Cambio (Bs/USDT)</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <p className="text-5xl font-extrabold tracking-wide mb-2 font-headline">
-                        {rate === '' ? '---' : parseFloat(rate).toFixed(2)}
+                     <div className="relative">
+                        <Label htmlFor="rate" className="sr-only">Tasa de Cambio</Label>
+                        <Input
+                            id="rate"
+                            type="number"
+                            step="0.01"
+                            className="text-5xl font-extrabold tracking-wide mb-2 font-headline text-center h-auto bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                            placeholder="0.00"
+                            value={rate}
+                            onChange={handleRateChange}
+                        />
+                     </div>
+                    <p className="text-sm text-muted-foreground">
+                        Tasa de referencia BCV: {bcvRates.dolar.toFixed(2)}
                     </p>
-                    <p className="text-sm text-primary-foreground/80">
-                        Piso: Bs {bcvRates.dolar.toFixed(2)} | Techo: Bs {bcvRates.euro.toFixed(2)}
-                    </p>
-                </CardContent>
-            </Card>
-
-            <Card>
-                <CardHeader>
-                    <CardTitle>Modificar Tasa de Subasta</CardTitle>
-                    <CardDescription>Ajusta la tasa de cambio dentro del rango oficial.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <Label htmlFor="rate">Tasa de Cambio</Label>
-                    <Input
-                        id="rate"
-                        type="number"
-                        step="0.01"
-                        className={`mt-1 ${isInvalidAndNotEmpty ? 'border-destructive focus-visible:ring-destructive' : ''}`}
-                        placeholder={`Tasa entre ${bcvRates.dolar.toFixed(2)} y ${bcvRates.euro.toFixed(2)}`}
-                        value={rate}
-                        onChange={handleRateChange}
-                    />
-                    {isInvalidAndNotEmpty && (
-                        <p className="text-destructive text-sm mt-2 animate-pulse">
-                            La tasa está fuera del rango permitido.
-                        </p>
-                    )}
                 </CardContent>
             </Card>
             
@@ -129,10 +130,12 @@ const SubastaPage = ({ processTransaction, userBalance, bsBalance, bcvRates }: S
                                     placeholder="Ej: 1000.00"
                                     value={bsAmount}
                                     onChange={(e) => setBsAmount(e.target.value)}
+                                    required
                                 />
+                                {!hasSufficientBs && bsAmount && <p className="text-destructive text-sm mt-1">Saldo en Bolívares insuficiente.</p>}
                             </div>
-                            <Button type="submit" className="w-full bg-green-600 hover:bg-green-700" disabled={!isValidRate || !bsAmount}>
-                                Confirmar Compra
+                            <Button type="submit" className="w-full bg-green-600 hover:bg-green-700" disabled={!isValidRate || !bsAmount || isLoadingBuy || !hasSufficientBs}>
+                                {isLoadingBuy ? <Loader2 className="animate-spin" /> : 'Confirmar Compra'}
                             </Button>
                         </form>
                     </CardContent>
@@ -156,10 +159,12 @@ const SubastaPage = ({ processTransaction, userBalance, bsBalance, bcvRates }: S
                                     placeholder="Ej: 50.00"
                                     value={usdtAmount}
                                     onChange={(e) => setUsdtAmount(e.target.value)}
+                                    required
                                 />
+                                {!hasSufficientUsdt && usdtAmount && <p className="text-destructive text-sm mt-1">Saldo en USDT insuficiente.</p>}
                             </div>
-                            <Button type="submit" className="w-full" variant="destructive" disabled={!isValidRate || !usdtAmount}>
-                                Confirmar Venta
+                            <Button type="submit" className="w-full" variant="destructive" disabled={!isValidRate || !usdtAmount || isLoadingSell || !hasSufficientUsdt}>
+                                {isLoadingSell ? <Loader2 className="animate-spin" /> : 'Confirmar Venta'}
                             </Button>
                         </form>
                     </CardContent>

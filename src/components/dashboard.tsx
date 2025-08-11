@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { handleAnalyzeExpenses } from "@/app/actions";
 import { BrainCircuit, Landmark, Loader2, Wallet } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
+import { ScrollArea } from './ui/scroll-area';
 
 interface DashboardProps {
     userBalance: number;
@@ -41,7 +42,7 @@ const Dashboard = ({ userBalance, bsBalance, transactionHistory }: DashboardProp
             return;
         }
 
-        const result = await handleAnalyzeExpenses(bsTransactions.map(tx => ({...tx, id: tx.id.toString() })));
+        const result = await handleAnalyzeExpenses(bsTransactions);
 
         if (result.success && result.data) {
             setAnalysisResult(result.data);
@@ -70,7 +71,7 @@ const Dashboard = ({ userBalance, bsBalance, transactionHistory }: DashboardProp
                         <Landmark className="h-6 w-6 text-accent" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-4xl font-bold font-headline text-accent">Bs {bsBalance.toFixed(2)}</div>
+                        <div className="text-4xl font-bold font-headline text-accent">Bs {bsBalance.toLocaleString('es-VE', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
                     </CardContent>
                 </Card>
             </div>
@@ -102,45 +103,57 @@ const Dashboard = ({ userBalance, bsBalance, transactionHistory }: DashboardProp
                                 {loadingAnalysis && <div className="flex justify-center items-center p-8"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}
                                 {analysisError && <Alert variant="destructive"><AlertTitle>Error</AlertTitle><AlertDescription>{analysisError}</AlertDescription></Alert>}
                                 {analysisResult && (
-                                    <div className="space-y-4">
-                                        <div>
-                                            <h3 className="font-semibold text-lg mb-2">Resumen de Gastos</h3>
-                                            <p className="text-sm text-muted-foreground bg-secondary p-4 rounded-md">{analysisResult.summary}</p>
+                                     <ScrollArea className="h-72">
+                                        <div className="space-y-4 pr-6">
+                                            <div>
+                                                <h3 className="font-semibold text-lg mb-2">Resumen de Gastos</h3>
+                                                <p className="text-sm text-muted-foreground bg-secondary p-4 rounded-md whitespace-pre-wrap">{analysisResult.summary}</p>
+                                            </div>
+                                            <div>
+                                                <h3 className="font-semibold text-lg mb-2">Recomendaciones</h3>
+                                                <p className="text-sm text-muted-foreground bg-secondary p-4 rounded-md whitespace-pre-wrap">{analysisResult.recommendations}</p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <h3 className="font-semibold text-lg mb-2">Recomendaciones</h3>
-                                            <p className="text-sm text-muted-foreground bg-secondary p-4 rounded-md">{analysisResult.recommendations}</p>
-                                        </div>
-                                    </div>
+                                    </ScrollArea>
                                 )}
                             </div>
                         </DialogContent>
                     </Dialog>
                 </CardHeader>
                 <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Descripción</TableHead>
-                                <TableHead className="text-right">Monto</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {transactionHistory.map(tx => (
-                                <TableRow key={tx.id}>
-                                    <TableCell>
-                                        <div className="font-medium">{tx.type}</div>
-                                        <div className="text-sm text-muted-foreground">{tx.description}</div>
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        <Badge variant={tx.amount > 0 ? 'default' : 'destructive'} className={`${tx.amount > 0 ? 'bg-green-500/20 text-green-700 border-green-500/30' : 'bg-red-500/20 text-red-700 border-red-500/30'} font-mono`}>
-                                            {tx.amount > 0 ? '+' : ''} {Math.abs(tx.amount).toFixed(2)} {tx.currency}
-                                        </Badge>
-                                    </TableCell>
+                    <ScrollArea className="h-[400px]">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Descripción</TableHead>
+                                    <TableHead className="text-right">Monto</TableHead>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                            </TableHeader>
+                            <TableBody>
+                                {transactionHistory.length > 0 ? transactionHistory.map(tx => (
+                                    <TableRow key={tx.id}>
+                                        <TableCell>
+                                            <div className="font-medium">{tx.type}</div>
+                                            <div className="text-sm text-muted-foreground">{tx.description}</div>
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            <Badge variant={tx.amount >= 0 ? 'default' : 'destructive'} className={`${tx.currency === 'USDT' ? 'bg-primary/20 text-primary border-primary/30' : (tx.amount >= 0 ? 'bg-green-500/20 text-green-700 border-green-500/30' : 'bg-red-500/20 text-red-700 border-red-500/30')} font-mono`}>
+                                                {tx.amount >= 0 && tx.currency === 'BS' ? '+' : ''}
+                                                {tx.amount < 0 && tx.currency === 'USDT' ? '-' : ''}
+                                                {Math.abs(tx.amount).toLocaleString('es-VE', {minimumFractionDigits: 2, maximumFractionDigits: 2})} {tx.currency}
+                                            </Badge>
+                                        </TableCell>
+                                    </TableRow>
+                                )) : (
+                                     <TableRow>
+                                        <TableCell colSpan={2} className="text-center text-muted-foreground">
+                                            No hay transacciones todavía.
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </ScrollArea>
                 </CardContent>
             </Card>
         </div>

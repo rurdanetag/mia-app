@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 
 interface CardPageProps {
-    processTransaction: (newUsdtAmount: number, newBsAmount: number, transactionDetails: any) => boolean;
+    processTransaction: (newUsdtAmount: number, newBsAmount: number, transactionDetails: any) => Promise<boolean>;
     userBalance: number;
     bsBalance: number;
     bcvRates: { dolar: number };
@@ -17,20 +17,27 @@ interface CardPageProps {
 const CardPage = ({ processTransaction, userBalance, bsBalance, bcvRates }: CardPageProps) => {
     const [amount, setAmount] = useState('');
     const [merchant, setMerchant] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setIsLoading(true);
         const numericAmount = parseFloat(amount);
+        if(!numericAmount || numericAmount <= 0) {
+            setIsLoading(false);
+            return;
+        }
+
         const usdtEquivalent = numericAmount / bcvRates.dolar;
         
-        const success = processTransaction(
+        const success = await processTransaction(
             userBalance - usdtEquivalent,
-            bsBalance, // Card payments are deducted from USDT via BS conversion at POS
+            bsBalance, // Los pagos con tarjeta se descuentan del saldo USDT.
             {
                 type: 'Compra con Tarjeta',
-                description: merchant || 'Comercio Local',
-                amount: -numericAmount, // The charge is in BS, but represented as a negative amount for history
-                currency: 'BS',
+                description: `Pago en ${merchant || 'Comercio Local'}`,
+                amount: usdtEquivalent, // Se registra el gasto en USDT
+                currency: 'USDT',
             }
         );
         
@@ -38,9 +45,11 @@ const CardPage = ({ processTransaction, userBalance, bsBalance, bcvRates }: Card
             setAmount('');
             setMerchant('');
         }
+        setIsLoading(false);
     };
     
     const usdtEquivalentDisplay = amount ? (parseFloat(amount) / bcvRates.dolar).toFixed(2) : '0.00';
+    const hasSufficientBalance = userBalance >= parseFloat(usdtEquivalentDisplay);
 
     return (
         <div className="max-w-xl mx-auto space-y-6">
@@ -77,6 +86,7 @@ const CardPage = ({ processTransaction, userBalance, bsBalance, bcvRates }: Card
                                 placeholder="Ej: Supermercado El Éxito"
                                 value={merchant}
                                 onChange={(e) => setMerchant(e.target.value)}
+                                required
                             />
                         </div>
                         <div>
@@ -89,13 +99,19 @@ const CardPage = ({ processTransaction, userBalance, bsBalance, bcvRates }: Card
                                 placeholder="Ej: 2500.00"
                                 value={amount}
                                 onChange={(e) => setAmount(e.target.value)}
+                                required
                             />
                         </div>
                         <p className="text-sm text-muted-foreground">
-                            Equivalente en USDT: <span className="font-bold text-primary">{usdtEquivalentDisplay} USDT</span>
+                            Equivalente a debitar: <span className="font-bold text-primary">{usdtEquivalentDisplay} USDT</span>
                         </p>
-                        <Button type="submit" className="w-full" disabled={!amount || !merchant}>
-                            Pagar con Tarjeta
+                         {!hasSufficientBalance && amount && (
+                            <p className="text-sm text-destructive">
+                                Saldo en USDT insuficiente.
+                            </p>
+                        )}
+                        <Button type="submit" className="w-full" disabled={!amount || !merchant || isLoading || !hasSufficientBalance}>
+                            {isLoading ? 'Procesando...' : 'Pagar con Tarjeta'}
                         </Button>
                     </form>
                 </CardContent>

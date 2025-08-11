@@ -7,10 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Info } from 'lucide-react';
+import { Info, Loader2 } from 'lucide-react';
 
 interface PagosPageProps {
-    processTransaction: (newUsdtAmount: number, newBsAmount: number, transactionDetails: any) => boolean;
+    processTransaction: (newUsdtAmount: number, newBsAmount: number, transactionDetails: any) => Promise<boolean>;
     userBalance: number;
     bsBalance: number;
     bcvRates: { dolar: number };
@@ -18,22 +18,32 @@ interface PagosPageProps {
 
 const PagosPage = ({ processTransaction, userBalance, bsBalance, bcvRates }: PagosPageProps) => {
     const [amount, setAmount] = useState('');
-    const [service, setService] = useState('electricidad');
+    const [service, setService] = useState('');
     const [billNumber, setBillNumber] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setIsLoading(true);
         const numericAmount = parseFloat(amount);
         
         let newBsBalance = bsBalance;
         let newUsdtBalance = userBalance;
         let usdtUsed = 0;
-        let description = `Pago de ${service} | Ref: ${billNumber || 'N/A'}`;
+        let description = `Pago de ${service || 'servicio'} | Ref: ${billNumber || 'N/A'}`;
 
         if (numericAmount > newBsBalance) {
             const remainingBs = numericAmount - newBsBalance;
             const usdtRequired = remainingBs / bcvRates.dolar;
             
+            if (usdtRequired > userBalance) {
+                // Not enough total balance
+                setIsLoading(false);
+                // Here you might want to show an error modal
+                console.error("Saldo total insuficiente");
+                return;
+            }
+
             newBsBalance = 0;
             newUsdtBalance -= usdtRequired;
             usdtUsed = usdtRequired;
@@ -42,13 +52,13 @@ const PagosPage = ({ processTransaction, userBalance, bsBalance, bcvRates }: Pag
             newBsBalance -= numericAmount;
         }
 
-        const success = processTransaction(
+        const success = await processTransaction(
             newUsdtBalance,
             newBsBalance,
             {
                 type: 'Pago de Servicio',
                 description: description,
-                amount: -numericAmount,
+                amount: numericAmount,
                 currency: 'BS',
                 usdtUsed: usdtUsed,
             }
@@ -57,8 +67,15 @@ const PagosPage = ({ processTransaction, userBalance, bsBalance, bcvRates }: Pag
         if (success) {
             setAmount('');
             setBillNumber('');
+            setService('');
         }
+        setIsLoading(false);
     };
+
+    const numericAmount = parseFloat(amount) || 0;
+    const remainingAfterBs = Math.max(0, numericAmount - bsBalance);
+    const usdtCost = remainingAfterBs / bcvRates.dolar;
+    const hasSufficientBalance = (bsBalance + (userBalance * bcvRates.dolar)) >= numericAmount;
 
     return (
         <div className="max-w-xl mx-auto space-y-6">
@@ -82,7 +99,7 @@ const PagosPage = ({ processTransaction, userBalance, bsBalance, bcvRates }: Pag
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
                             <Label htmlFor="service">Servicio</Label>
-                            <Select value={service} onValueChange={setService}>
+                            <Select value={service} onValueChange={setService} required>
                                 <SelectTrigger id="service" className="w-full mt-1">
                                     <SelectValue placeholder="Seleccione un servicio" />
                                 </SelectTrigger>
@@ -105,6 +122,7 @@ const PagosPage = ({ processTransaction, userBalance, bsBalance, bcvRates }: Pag
                                 placeholder="Ej: 123456789"
                                 value={billNumber}
                                 onChange={(e) => setBillNumber(e.target.value)}
+                                required
                             />
                         </div>
                         <div>
@@ -117,13 +135,24 @@ const PagosPage = ({ processTransaction, userBalance, bsBalance, bcvRates }: Pag
                                 placeholder="Ej: 1500.50"
                                 value={amount}
                                 onChange={(e) => setAmount(e.target.value)}
+                                required
                             />
                             <p className="mt-2 text-sm text-muted-foreground">
                                 Tasa de conversión: <strong>1 USDT = {bcvRates.dolar.toFixed(2)} Bs</strong>
                             </p>
+                            {usdtCost > 0 && (
+                               <p className="mt-1 text-sm text-blue-600">
+                                   Se usarán {bsBalance.toFixed(2)} Bs y se convertirán {usdtCost.toFixed(2)} USDT.
+                               </p>
+                            )}
+                            {!hasSufficientBalance && amount && (
+                                <p className="text-sm text-destructive mt-1">
+                                    Saldo total insuficiente para este pago.
+                                </p>
+                            )}
                         </div>
-                        <Button type="submit" className="w-full" disabled={!amount || !billNumber}>
-                            Realizar Pago
+                        <Button type="submit" className="w-full" disabled={!amount || !billNumber || !service || isLoading || !hasSufficientBalance}>
+                           {isLoading ? <Loader2 className="animate-spin" /> : 'Realizar Pago'}
                         </Button>
                     </form>
                 </CardContent>

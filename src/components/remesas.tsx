@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import type { Transaction } from "@/lib/types";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -10,7 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { CheckCircle2, ArrowLeft, ArrowRight } from "lucide-react";
 
 interface RemesasPageProps {
-    processTransaction: (newUsdtAmount: number, newBsAmount: number, transactionDetails: any) => boolean;
+    processTransaction: (newUsdtAmount: number, newBsAmount: number, transactionDetails: any) => Promise<boolean>;
     userBalance: number;
     bsBalance: number;
 }
@@ -33,6 +34,8 @@ const RemesasPage = ({ processTransaction, userBalance, bsBalance }: RemesasPage
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         const numericAmount = parseFloat(remesaData.amountToSend);
+        if (!numericAmount || numericAmount <= 0 || numericAmount > userBalance) return;
+        
         const commissionRate = remesaData.paymentMethod === 'app-balance' ? 0 : 0.01;
         const commission = numericAmount * commissionRate;
         const finalAmount = numericAmount - commission;
@@ -40,11 +43,11 @@ const RemesasPage = ({ processTransaction, userBalance, bsBalance }: RemesasPage
         setStep('confirm');
     };
 
-    const handleConfirm = () => {
+    const handleConfirm = async () => {
         const numericAmount = parseFloat(remesaData.amountToSend);
-        const success = processTransaction(
+        const success = await processTransaction(
             userBalance - numericAmount,
-            bsBalance,
+            bsBalance, // Remesas no afectan el saldo en BS directamente
             {
                 type: 'Remesa Enviada',
                 description: `A ${recipientInfo.name} | Método: ${remesaData.paymentMethod === 'app-balance' ? 'Saldo App' : 'Externo'}`,
@@ -56,6 +59,11 @@ const RemesasPage = ({ processTransaction, userBalance, bsBalance }: RemesasPage
             setStep('result');
         }
     };
+    
+    const resetForm = () => {
+        setRemesaData({ recipientUser: '', amountToSend: '', paymentMethod: 'app-balance' });
+        setStep('form');
+    }
 
     const renderForm = () => (
         <Card>
@@ -78,22 +86,16 @@ const RemesasPage = ({ processTransaction, userBalance, bsBalance }: RemesasPage
                         <RadioGroup name="paymentMethod" value={remesaData.paymentMethod} onValueChange={(value) => setRemesaData(prev => ({...prev, paymentMethod: value}))} className="space-y-2">
                            {['app-balance', 'card', 'bank-transfer'].map(method => (
                                <Label key={method} className="flex items-center p-3 border rounded-md cursor-pointer hover:bg-secondary has-[:checked]:bg-secondary has-[:checked]:border-primary">
-                                   <RadioGroupItem value={method} id={method} />
+                                   <RadioGroupItem value={method} id={method} disabled={method !== 'app-balance'}/>
                                    <span className="ml-3 text-sm font-medium">{
-                                       { 'app-balance': 'Saldo en la App (sin comisión)', 'card': 'Tarjeta de Crédito/Débito (1% comisión)', 'bank-transfer': 'Transferencia Bancaria (1% comisión)' }[method]
+                                       { 'app-balance': 'Saldo en la App (sin comisión)', 'card': 'Tarjeta de Crédito/Débito (1% comisión) - No disponible', 'bank-transfer': 'Transferencia Bancaria (1% comisión) - No disponible' }[method]
                                    }</span>
                                </Label>
                            ))}
                         </RadioGroup>
                     </div>
-                    { (remesaData.paymentMethod === 'card' || remesaData.paymentMethod === 'bank-transfer') && (
-                        <div className="flex items-center space-x-2 pt-4">
-                           <Checkbox id="saveDetails" checked={saveDetails} onCheckedChange={(checked) => setSaveDetails(checked as boolean)} />
-                           <Label htmlFor="saveDetails" className="text-sm font-normal">Guardar datos para futuras transacciones</Label>
-                        </div>
-                    )}
-                    <Button type="submit" className="w-full">
-                        Enviar Remesa <ArrowRight className="ml-2 h-4 w-4" />
+                    <Button type="submit" className="w-full" disabled={!remesaData.amountToSend || !remesaData.recipientUser || parseFloat(remesaData.amountToSend) > userBalance}>
+                        {parseFloat(remesaData.amountToSend) > userBalance ? 'Saldo USDT Insuficiente' : <>Enviar Remesa <ArrowRight className="ml-2 h-4 w-4" /></>}
                     </Button>
                 </form>
             </CardContent>
@@ -135,7 +137,7 @@ const RemesasPage = ({ processTransaction, userBalance, bsBalance }: RemesasPage
                 <p className="text-muted-foreground mb-6">
                     La remesa ha sido enviada con éxito.
                 </p>
-                <Button onClick={() => setStep('form')} className="w-full">
+                <Button onClick={resetForm} className="w-full">
                     Enviar otra Remesa
                 </Button>
             </CardContent>
