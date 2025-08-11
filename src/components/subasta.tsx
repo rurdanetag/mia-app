@@ -77,7 +77,9 @@ const SubastaPage = ({ processTransaction, userBalance, bsBalance, bcvRates }: S
         setIsLoadingSell(false);
     };
 
-    const isValidRate = !isNaN(parseFloat(rate)) && parseFloat(rate) > 0;
+    const numericRate = parseFloat(rate);
+    const rateDifference = Math.abs(numericRate - bcvRates.dolar) / bcvRates.dolar;
+    const isValidRate = !isNaN(numericRate) && numericRate > 0 && rateDifference <= 0.10;
     const hasSufficientBs = bsBalance >= parseFloat(bsAmount || '0');
     const hasSufficientUsdt = userBalance >= parseFloat(usdtAmount || '0');
 
@@ -108,6 +110,11 @@ const SubastaPage = ({ processTransaction, userBalance, bsBalance, bcvRates }: S
                     <p className="text-sm text-muted-foreground">
                         Tasa de referencia BCV: {bcvRates.dolar.toFixed(2)}
                     </p>
+                    {rate && !isValidRate && (
+                        <p className="text-destructive text-sm mt-2">
+                           La tasa no puede desviarse más de un 10% de la tasa de referencia.
+                        </p>
+                    )}
                 </CardContent>
             </Card>
             
