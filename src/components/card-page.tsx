@@ -57,42 +57,45 @@ const CardPage = ({ processTransaction, userBalance, bsBalance, bcvRates }: Card
                 <h1 className="text-3xl font-bold font-headline text-gray-800">Mi Tarjeta de Débito M.I.A.</h1>
             </div>
             
-            {/* Mastercard design */}
-            <div className="bg-gray-800 text-white w-full aspect-[1.586] rounded-xl shadow-lg flex flex-col justify-between p-6 transform transition-transform duration-300 hover:scale-105">
-                <div className="flex justify-between items-start">
-                    <h2 className="text-xl font-bold font-headline">M.I.A.</h2>
+             {/* Premium Card Design */}
+            <div className="relative bg-black text-white w-full aspect-[1.586] rounded-xl shadow-2xl flex flex-col justify-between p-6 transform transition-transform duration-500 hover:scale-105 overflow-hidden group">
+                 {/* Glossy Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
+                 {/* World Map Background */}
+                <div 
+                    className="absolute inset-0 bg-center bg-cover opacity-10 group-hover:opacity-20 transition-opacity duration-500"
+                    style={{ backgroundImage: "url('https://www.svgrepo.com/show/509206/world-map.svg')" }}
+                ></div>
+
+                <div className="relative z-10 flex justify-between items-start">
+                     {/* M.I.A. Logo with relief */}
+                    <h2 className="text-3xl font-bold font-headline" style={{ textShadow: '0px 1px 2px rgba(0,0,0,0.5), 0px 0px 1px rgba(255,255,255,0.3)' }}>M.I.A</h2>
+
                     {/* Chip */}
-                    <div className="w-12 h-10 bg-gradient-to-br from-yellow-300 to-yellow-500 rounded-md">
-                        <div className="w-full h-full border border-yellow-600/50 rounded-md grid grid-cols-2 gap-px p-1">
-                            <div className="border-r border-b border-yellow-600/50"></div>
-                            <div className="border-b border-yellow-600/50"></div>
-                            <div className="border-r border-yellow-600/50"></div>
+                    <div className="w-12 h-10 bg-gradient-to-br from-gray-400 to-gray-600 rounded-md shadow-inner">
+                        <div className="w-full h-full border border-gray-500/50 rounded-md grid grid-cols-2 gap-px p-1">
+                            <div className="border-r border-b border-gray-500/50"></div>
+                            <div className="border-b border-gray-500/50"></div>
+                            <div className="border-r border-gray-500/50"></div>
                             <div></div>
                         </div>
                     </div>
                 </div>
 
-                <div className="text-center">
-                    <p className="font-mono text-2xl sm:text-3xl tracking-widest">
+                <div className="relative z-10 text-center">
+                    <p className="font-mono text-2xl sm:text-3xl tracking-widest" style={{ textShadow: '0px 1px 2px rgba(0,0,0,0.5)' }}>
                         4242 1234 5678 9010
                     </p>
                 </div>
                 
-                <div className="flex justify-between items-end">
+                <div className="relative z-10 flex justify-between items-end" style={{ textShadow: '0px 1px 2px rgba(0,0,0,0.5)' }}>
                     <div>
-                        <p className="text-xs opacity-70">TITULAR</p>
+                        <p className="text-xs opacity-70 tracking-wider">TITULAR</p>
                         <p className="font-medium tracking-wider">USUARIO DE M.I.A.</p>
                     </div>
-                     <div className="flex items-center">
-                        <div className="flex-col text-right mr-4">
-                           <p className="text-xs opacity-70">VÁLIDO HASTA</p>
-                           <p className="font-medium tracking-wider">12/28</p>
-                        </div>
-                        {/* Mastercard Logo */}
-                        <div className="relative flex-shrink-0">
-                            <div className="w-12 h-8 bg-red-600 rounded-full"></div>
-                            <div className="w-12 h-8 bg-yellow-500 rounded-full absolute top-0 left-6 opacity-80 mix-blend-screen"></div>
-                        </div>
+                     <div className="text-right">
+                       <p className="text-xs opacity-70 tracking-wider">VÁLIDO HASTA</p>
+                       <p className="font-medium tracking-wider">12/28</p>
                     </div>
                 </div>
             </div>
