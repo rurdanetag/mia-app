@@ -36,7 +36,7 @@ const CardPage = ({ processTransaction, userBalance, bsBalance, bcvRates }: Card
             {
                 type: 'Compra con Tarjeta',
                 description: `Pago en ${merchant || 'Comercio Local'}`,
-                amount: usdtEquivalent, // Se registra el gasto en USDT
+                amount: -usdtEquivalent, // Se registra el gasto en USDT
                 currency: 'USDT',
             }
         );
@@ -93,9 +93,12 @@ const CardPage = ({ processTransaction, userBalance, bsBalance, bcvRates }: Card
                         <p className="text-xs opacity-70 tracking-wider">TITULAR</p>
                         <p className="font-medium tracking-wider">USUARIO DE M.I.A.</p>
                     </div>
-                     <div className="text-right">
-                       <p className="text-xs opacity-70 tracking-wider">VÁLIDO HASTA</p>
-                       <p className="font-medium tracking-wider">12/28</p>
+                    <div className="flex items-center gap-1">
+                        <div className="w-9 h-6 relative">
+                            <div className="w-6 h-6 rounded-full bg-red-600/80 absolute right-0"></div>
+                            <div className="w-6 h-6 rounded-full bg-yellow-500/80 absolute left-0 mix-blend-screen"></div>
+                        </div>
+                        <p className="font-semibold text-sm">mastercard</p>
                     </div>
                 </div>
             </div>

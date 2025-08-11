@@ -58,8 +58,8 @@ const Comprobante = ({ lastTransaction, navigateTo }: ComprobanteProps) => {
                     </div>
                     <div className="flex justify-between items-center mt-4 border-t pt-4">
                         <span className="text-lg font-bold text-foreground">Monto:</span>
-                        <span className={`text-xl font-bold font-mono ${lastTransaction.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                            {lastTransaction.amount > 0 ? '+' : ''}{Math.abs(lastTransaction.amount).toFixed(2)} {lastTransaction.currency}
+                        <span className={`text-xl font-bold font-mono ${lastTransaction.amount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {lastTransaction.amount >= 0 ? '+' : ''}{Math.abs(lastTransaction.amount).toFixed(2)} {lastTransaction.currency}
                         </span>
                     </div>
                     <Button className="w-full mt-4" onClick={() => navigateTo('home')}>
