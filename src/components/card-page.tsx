@@ -2,12 +2,15 @@
 
 import { useState } from 'react';
 import type { Transaction } from "@/lib/types";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription, AlertTitle } from './ui/alert';
-import { Info } from 'lucide-react';
+import { Alert, AlertDescription } from './ui/alert';
+import { Info, CheckCircle, PartyPopper, Copy } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useToast } from "@/hooks/use-toast"
 
 interface CardPageProps {
     processTransaction: (newUsdtAmount: number, newBsAmount: number, transactionDetails: any) => Promise<boolean>;
@@ -20,6 +23,43 @@ const CardPage = ({ processTransaction, userBalance, bsBalance, bcvRates }: Card
     const [amount, setAmount] = useState('');
     const [merchant, setMerchant] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const { toast } = useToast();
+
+    // State for the request card form
+    const [isFormOpen, setIsFormOpen] = useState(false);
+    const [requestStep, setRequestStep] = useState<'form' | 'success'>('form');
+    const [requestData, setRequestData] = useState({ country: '', state: '', city: '', bank: '' });
+    const [solicitudeNumber, setSolicitudeNumber] = useState('');
+
+    const handleRequestDataChange = (field: keyof typeof requestData, value: string) => {
+        const newData = { ...requestData, [field]: value };
+        if (field === 'country' && value !== 'Venezuela') {
+            newData.bank = '';
+        }
+        setRequestData(newData);
+    };
+
+    const handleRequestSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        const newSolicitudeNumber = `MIA-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+        setSolicitudeNumber(newSolicitudeNumber);
+        setRequestStep('success');
+    };
+
+    const resetRequestForm = () => {
+        setRequestData({ country: '', state: '', city: '', bank: '' });
+        setRequestStep('form');
+        setIsFormOpen(false);
+    }
+    
+    const copyToClipboard = () => {
+        navigator.clipboard.writeText(solicitudeNumber);
+        toast({
+          title: "¡Copiado!",
+          description: "Número de solicitud copiado al portapapeles.",
+        })
+    }
+
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -52,6 +92,7 @@ const CardPage = ({ processTransaction, userBalance, bsBalance, bcvRates }: Card
     
     const usdtEquivalentDisplay = amount ? (parseFloat(amount) / bcvRates.dolar).toFixed(2) : '0.00';
     const hasSufficientBalance = userBalance >= parseFloat(usdtEquivalentDisplay);
+    const isRequestFormValid = requestData.country && requestData.state && requestData.city && requestData.bank;
 
     return (
         <div className="max-w-xl mx-auto space-y-6">
@@ -161,12 +202,95 @@ const CardPage = ({ processTransaction, userBalance, bsBalance, bcvRates }: Card
                     <Alert>
                         <Info className="h-4 w-4" />
                         <AlertDescription>
-                            La solicitud de tu primera tarjeta M.I.A. es completamente <strong>gratuita</strong>. Las renovaciones o reemplazos tendrán un costo de 5 USDT, que se debitarán de tu saldo (en USDT o su equivalente en Bs.).
+                           La solicitud de tu primera tarjeta M.I.A. es <strong>gratuita</strong>. Las renovaciones o reemplazos tendrán un costo de 5 USDT, que se debitarán de tu saldo.
                         </AlertDescription>
                     </Alert>
-                    <Button className="w-full" disabled>
-                       Solicitar Tarjeta (Próximamente)
-                    </Button>
+                    <Dialog open={isFormOpen} onOpenChange={(open) => { if (!open) { resetRequestForm(); } setIsFormOpen(open); }}>
+                        <DialogTrigger asChild>
+                            <Button className="w-full" onClick={() => setIsFormOpen(true)}>
+                               Solicitar Tarjeta
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            {requestStep === 'form' && (
+                                <>
+                                    <DialogHeader>
+                                        <DialogTitle>Formulario de Solicitud</DialogTitle>
+                                        <DialogDescription>
+                                            Completa tus datos para coordinar la entrega de tu tarjeta.
+                                        </DialogDescription>
+                                    </DialogHeader>
+                                    <form onSubmit={handleRequestSubmit}>
+                                        <div className="space-y-4 py-4">
+                                            <div>
+                                                <Label htmlFor="country">País</Label>
+                                                <Select value={requestData.country} onValueChange={(value) => handleRequestDataChange('country', value)} required>
+                                                    <SelectTrigger id="country"><SelectValue placeholder="Seleccione un país" /></SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="Venezuela">Venezuela</SelectItem>
+                                                        <SelectItem value="Colombia">Colombia</SelectItem>
+                                                        <SelectItem value="Otro">Otro</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                            <div>
+                                                <Label htmlFor="state">Estado / Provincia</Label>
+                                                <Input id="state" value={requestData.state} onChange={(e) => handleRequestDataChange('state', e.target.value)} placeholder="Ej: Miranda" required />
+                                            </div>
+                                             <div>
+                                                <Label htmlFor="city">Ciudad</Label>
+                                                <Input id="city" value={requestData.city} onChange={(e) => handleRequestDataChange('city', e.target.value)} placeholder="Ej: Caracas" required />
+                                            </div>
+                                            <div>
+                                                <Label htmlFor="bank">Banco para retirar</Label>
+                                                <Select value={requestData.bank} onValueChange={(value) => handleRequestDataChange('bank', value)} required>
+                                                    <SelectTrigger id="bank"><SelectValue placeholder="Seleccione un banco" /></SelectTrigger>
+                                                    <SelectContent>
+                                                        {requestData.country === 'Venezuela' ? (
+                                                            <>
+                                                                <SelectItem value="banco-de-venezuela">Banco de Venezuela</SelectItem>
+                                                                <SelectItem value="bancamiga">Bancamiga</SelectItem>
+                                                            </>
+                                                        ) : (
+                                                            <SelectItem value="retiro-internacional" disabled={!requestData.country}>
+                                                                {requestData.country ? 'Agencia Internacional Aliada' : 'Seleccione un país primero'}
+                                                            </SelectItem>
+                                                        )}
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                        </div>
+                                        <DialogFooter>
+                                            <Button type="submit" disabled={!isRequestFormValid}>Generar Solicitud</Button>
+                                        </DialogFooter>
+                                    </form>
+                                </>
+                            )}
+                            {requestStep === 'success' && (
+                                <>
+                                    <DialogHeader className="text-center items-center">
+                                         <PartyPopper className="h-16 w-16 text-primary" />
+                                        <DialogTitle>¡Solicitud Generada con Éxito!</DialogTitle>
+                                        <DialogDescription>
+                                            Guarda tu número de solicitud. Te contactaremos pronto para coordinar la entrega.
+                                        </DialogDescription>
+                                    </DialogHeader>
+                                    <div className="py-4">
+                                        <Label htmlFor='solicitude-number'>Número de Solicitud</Label>
+                                        <div className="flex items-center space-x-2">
+                                            <Input id="solicitude-number" value={solicitudeNumber} readOnly />
+                                            <Button variant="outline" size="icon" onClick={copyToClipboard}>
+                                                <Copy className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                    <DialogFooter>
+                                        <Button onClick={resetRequestForm}>Finalizar</Button>
+                                    </DialogFooter>
+                                </>
+                            )}
+                        </DialogContent>
+                    </Dialog>
                 </CardContent>
             </Card>
         </div>
@@ -174,3 +298,5 @@ const CardPage = ({ processTransaction, userBalance, bsBalance, bcvRates }: Card
 };
 
 export default CardPage;
+
+    
