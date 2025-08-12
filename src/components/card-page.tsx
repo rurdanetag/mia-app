@@ -2,15 +2,16 @@
 
 import { useState } from 'react';
 import type { Transaction } from "@/lib/types";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from './ui/alert';
-import { Info, CheckCircle, PartyPopper, Copy } from 'lucide-react';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import { Info, PartyPopper, Copy, LockKeyhole } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from "@/hooks/use-toast"
+import { cn } from '@/lib/utils';
 
 interface CardPageProps {
     processTransaction: (newUsdtAmount: number, newBsAmount: number, transactionDetails: any) => Promise<boolean>;
@@ -24,6 +25,12 @@ const CardPage = ({ processTransaction, userBalance, bsBalance, bcvRates }: Card
     const [merchant, setMerchant] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const { toast } = useToast();
+
+    // Card flip and PIN state
+    const [isFlipped, setIsFlipped] = useState(false);
+    const [isPinDialogOpen, setIsPinDialogOpen] = useState(false);
+    const [pin, setPin] = useState('');
+    const [pinError, setPinError] = useState('');
 
     // State for the request card form
     const [isFormOpen, setIsFormOpen] = useState(false);
@@ -60,7 +67,6 @@ const CardPage = ({ processTransaction, userBalance, bsBalance, bcvRates }: Card
         })
     }
 
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
@@ -89,6 +95,25 @@ const CardPage = ({ processTransaction, userBalance, bsBalance, bcvRates }: Card
         }
         setIsLoading(false);
     };
+
+    const handleCardClick = () => {
+        if (isFlipped) {
+            setIsFlipped(false);
+        } else {
+            setIsPinDialogOpen(true);
+        }
+    };
+
+    const handlePinSubmit = () => {
+        if (pin === '123456') {
+            setPinError('');
+            setIsPinDialogOpen(false);
+            setIsFlipped(true);
+            setPin('');
+        } else {
+            setPinError('PIN incorrecto. Inténtalo de nuevo.');
+        }
+    };
     
     const usdtEquivalentDisplay = amount ? (parseFloat(amount) / bcvRates.dolar).toFixed(2) : '0.00';
     const hasSufficientBalance = userBalance >= parseFloat(usdtEquivalentDisplay);
@@ -99,49 +124,70 @@ const CardPage = ({ processTransaction, userBalance, bsBalance, bcvRates }: Card
             <div className="text-center">
                 <h1 className="text-2xl sm:text-3xl font-bold font-headline text-gray-800">Mi Tarjeta de Débito M.I.A.</h1>
             </div>
-            
-             {/* Premium Card Design */}
-            <div className="relative bg-black text-white w-full aspect-[1.586] rounded-xl shadow-2xl flex flex-col justify-between p-4 sm:p-6 transform transition-transform duration-500 hover:scale-105 overflow-hidden group">
-                 {/* Glossy Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
-                 {/* World Map Background */}
-                <div 
-                    className="absolute inset-0 bg-center bg-cover opacity-10 group-hover:opacity-20 transition-opacity duration-500"
-                    style={{ backgroundImage: "url('https://www.svgrepo.com/show/509206/world-map.svg')" }}
-                ></div>
 
-                <div className="relative z-10 flex justify-between items-start">
-                     {/* M.I.A. Logo with relief */}
-                    <h2 className="text-2xl sm:text-3xl font-bold font-headline" style={{ textShadow: '0px 1px 2px rgba(0,0,0,0.5), 0px 0px 1px rgba(255,255,255,0.3)' }}>M.I.A</h2>
-
-                    {/* Chip */}
-                    <div className="w-10 sm:w-12 h-8 sm:h-10 bg-gradient-to-br from-gray-400 to-gray-600 rounded-md shadow-inner">
-                        <div className="w-full h-full border border-gray-500/50 rounded-md grid grid-cols-2 gap-px p-1">
-                            <div className="border-r border-b border-gray-500/50"></div>
-                            <div className="border-b border-gray-500/50"></div>
-                            <div className="border-r border-gray-500/50"></div>
-                            <div></div>
+            {/* Card Container for 3D flip effect */}
+            <div className="perspective-1000">
+                <div
+                    className={cn(
+                        "relative w-full aspect-[1.586] transform-style-3d transition-transform duration-700 cursor-pointer",
+                        isFlipped && "rotate-y-180"
+                    )}
+                    onClick={handleCardClick}
+                >
+                    {/* Front of the Card */}
+                    <div className="absolute w-full h-full backface-hidden">
+                        <div className="relative bg-black text-white w-full h-full rounded-xl shadow-2xl flex flex-col justify-between p-4 sm:p-6 overflow-hidden group">
+                            <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
+                            <div 
+                                className="absolute inset-0 bg-center bg-cover opacity-10 group-hover:opacity-20 transition-opacity duration-500"
+                                style={{ backgroundImage: "url('https://www.svgrepo.com/show/509206/world-map.svg')" }}
+                            ></div>
+                            <div className="relative z-10 flex justify-between items-start">
+                                <h2 className="text-2xl sm:text-3xl font-bold font-headline" style={{ textShadow: '0px 1px 2px rgba(0,0,0,0.5), 0px 0px 1px rgba(255,255,255,0.3)' }}>M.I.A</h2>
+                                <div className="w-10 sm:w-12 h-8 sm:h-10 bg-gradient-to-br from-gray-400 to-gray-600 rounded-md shadow-inner">
+                                    <div className="w-full h-full border border-gray-500/50 rounded-md grid grid-cols-2 gap-px p-1">
+                                        <div className="border-r border-b border-gray-500/50"></div>
+                                        <div className="border-b border-gray-500/50"></div>
+                                        <div className="border-r border-gray-500/50"></div>
+                                        <div></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="relative z-10 text-center">
+                                <p className="font-mono text-xl sm:text-3xl tracking-widest" style={{ textShadow: '0px 1px 2px rgba(0,0,0,0.5)' }}>
+                                    4242 1234 5678 9010
+                                </p>
+                            </div>
+                            <div className="relative z-10 flex justify-between items-end" style={{ textShadow: '0px 1px 2px rgba(0,0,0,0.5)' }}>
+                                <div>
+                                    <p className="text-xs opacity-70 tracking-wider">TITULAR</p>
+                                    <p className="font-medium tracking-wider text-sm sm:text-base">USUARIO DE M.I.A.</p>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                    <div className="w-8 sm:w-9 h-5 sm:h-6 relative">
+                                        <div className="w-5 sm:w-6 h-5 sm:h-6 rounded-full bg-red-600/80 absolute right-0"></div>
+                                        <div className="w-5 sm:w-6 h-5 sm:h-6 rounded-full bg-yellow-500/80 absolute left-0 mix-blend-screen"></div>
+                                    </div>
+                                    <p className="font-semibold text-xs sm:text-sm">mastercard</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-
-                <div className="relative z-10 text-center">
-                    <p className="font-mono text-xl sm:text-3xl tracking-widest" style={{ textShadow: '0px 1px 2px rgba(0,0,0,0.5)' }}>
-                        4242 1234 5678 9010
-                    </p>
-                </div>
-                
-                <div className="relative z-10 flex justify-between items-end" style={{ textShadow: '0px 1px 2px rgba(0,0,0,0.5)' }}>
-                    <div>
-                        <p className="text-xs opacity-70 tracking-wider">TITULAR</p>
-                        <p className="font-medium tracking-wider text-sm sm:text-base">USUARIO DE M.I.A.</p>
-                    </div>
-                    <div className="flex items-center gap-1">
-                        <div className="w-8 sm:w-9 h-5 sm:h-6 relative">
-                            <div className="w-5 sm:w-6 h-5 sm:h-6 rounded-full bg-red-600/80 absolute right-0"></div>
-                            <div className="w-5 sm:w-6 h-5 sm:h-6 rounded-full bg-yellow-500/80 absolute left-0 mix-blend-screen"></div>
+                    {/* Back of the Card */}
+                     <div className="absolute w-full h-full backface-hidden rotate-y-180">
+                        <div className="bg-black text-white w-full h-full rounded-xl shadow-2xl flex flex-col p-4 sm:p-6">
+                            <div className="w-full h-12 bg-gray-800 mt-4"></div>
+                            <div className="flex items-center mt-4 gap-4">
+                               <div className="w-3/4 h-8 bg-gray-200 flex justify-end items-center pr-2" style={{ clipPath: 'polygon(0 0, 100% 0, 100% 100%, 10% 100%, 0 50%)' }}>
+                                    <p className="text-black font-mono italic font-bold text-sm">123</p>
+                                </div>
+                                 <p className="text-xs text-gray-400">CVV</p>
+                            </div>
+                             <p className="text-xs mt-4 text-gray-500">
+                                Esta tarjeta es propiedad de Billetera M.I.A. y su uso está sujeto a los términos y condiciones del servicio.
+                                Si la encuentra, por favor repórtela.
+                            </p>
                         </div>
-                        <p className="font-semibold text-xs sm:text-sm">mastercard</p>
                     </div>
                 </div>
             </div>
@@ -293,6 +339,48 @@ const CardPage = ({ processTransaction, userBalance, bsBalance, bcvRates }: Card
                     </Dialog>
                 </CardContent>
             </Card>
+
+            <Dialog open={isPinDialogOpen} onOpenChange={(open) => {
+                if (!open) {
+                    setPin('');
+                    setPinError('');
+                }
+                setIsPinDialogOpen(open);
+            }}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center justify-center gap-2">
+                            <LockKeyhole className="h-6 w-6" /> PIN de Seguridad
+                        </DialogTitle>
+                        <DialogDescription className="text-center pt-2">
+                            Ingresa tu PIN de 6 dígitos para ver el reverso de la tarjeta.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="py-4 space-y-2">
+                        <Label htmlFor="pin-input" className="sr-only">PIN</Label>
+                        <Input
+                            id="pin-input"
+                            type="password"
+                            maxLength={6}
+                            value={pin}
+                            onChange={(e) => setPin(e.target.value)}
+                            className="text-center text-2xl tracking-[0.5em]"
+                            placeholder="●●●●●●"
+                        />
+                        {pinError && <p className="text-destructive text-sm text-center">{pinError}</p>}
+                    </div>
+                    <DialogFooter>
+                        <Button
+                            className="w-full"
+                            onClick={handlePinSubmit}
+                            disabled={pin.length !== 6}
+                        >
+                            Confirmar
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
         </div>
     );
 };
