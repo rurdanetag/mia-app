@@ -78,7 +78,7 @@ const SubastaPage = ({ processTransaction, userBalance, bsBalance, bcvRates }: S
     };
 
     const numericRate = parseFloat(rate);
-    const minRate = bcvRates.dolar - 10;
+    const minRate = bcvRates.dolar;
     const maxRate = bcvRates.dolar + 10;
     const isValidRate = !isNaN(numericRate) && numericRate >= minRate && numericRate <= maxRate;
     const hasSufficientBs = bsBalance >= parseFloat(bsAmount || '0');
