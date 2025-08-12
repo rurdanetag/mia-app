@@ -159,9 +159,15 @@ const CardPage = ({ processTransaction, userBalance, bsBalance, bcvRates }: Card
                                 </p>
                             </div>
                             <div className="relative z-10 flex justify-between items-end" style={{ textShadow: '0px 1px 2px rgba(0,0,0,0.5)' }}>
-                                <div>
-                                    <p className="text-xs opacity-70 tracking-wider">TITULAR</p>
-                                    <p className="font-medium tracking-wider text-sm sm:text-base">USUARIO DE M.I.A.</p>
+                                <div className="flex items-end gap-4">
+                                    <div>
+                                        <p className="text-xs opacity-70 tracking-wider">TITULAR</p>
+                                        <p className="font-medium tracking-wider text-sm sm:text-base">USUARIO DE M.I.A.</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs opacity-70 tracking-wider">VENCE</p>
+                                        <p className="font-medium tracking-wider text-sm sm:text-base">12/28</p>
+                                    </div>
                                 </div>
                                 <div className="flex items-center gap-1">
                                     <div className="w-8 sm:w-9 h-5 sm:h-6 relative">
@@ -386,3 +392,5 @@ const CardPage = ({ processTransaction, userBalance, bsBalance, bcvRates }: Card
 };
 
 export default CardPage;
+
+    
