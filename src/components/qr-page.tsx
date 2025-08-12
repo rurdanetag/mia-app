@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, QrCode, ScanLine } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Buffer } from 'buffer';
+
 
 interface QrPageProps {
     processTransaction: (newUsdtAmount: number, newBsAmount: number, transactionDetails: any) => Promise<boolean>;
@@ -80,6 +82,18 @@ const ScanQr = ({ processTransaction, userBalance, bsBalance }: QrPageProps) => 
             if (!userId || !amount || typeof amount !== 'number' || amount <= 0) {
                 throw new Error("Código QR inválido o corrupto.");
             }
+            
+            const hasSufficientBalance = userBalance >= amount;
+            if(!hasSufficientBalance) {
+                 toast({
+                    variant: "destructive",
+                    title: "Saldo Insuficiente",
+                    description: "No tienes suficientes fondos USDT para realizar este pago.",
+                })
+                setIsLoading(false);
+                return;
+            }
+
 
             // Simulate the transaction
             const success = await processTransaction(
