@@ -16,8 +16,9 @@ import RemesasPage from '@/components/remesas';
 import RecargasPage from '@/components/recargas';
 import Comprobante from '@/components/comprobante';
 import QrPage from '@/components/qr-page';
+import ReferralPage from '@/components/referral-page';
 
-export type Page = 'home' | 'tarjeta' | 'remesas' | 'pagos' | 'subasta' | 'comprobante' | 'recargas' | 'qr';
+export type Page = 'home' | 'tarjeta' | 'remesas' | 'pagos' | 'subasta' | 'comprobante' | 'recargas' | 'qr' | 'referidos';
 
 export default function Home() {
     const [currentPage, setCurrentPage] = useState<Page>('home');
@@ -109,6 +110,8 @@ export default function Home() {
                 return <RecargasPage processTransaction={processTransaction} bsBalance={bsBalance} userBalance={userBalance}/>;
             case 'qr':
                 return <QrPage processTransaction={processTransaction} userBalance={userBalance} bsBalance={bsBalance} />;
+            case 'referidos':
+                return <ReferralPage />;
             case 'comprobante':
                 return <Comprobante lastTransaction={lastTransaction} navigateTo={navigateTo} />;
             case 'home':

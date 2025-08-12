@@ -1,7 +1,7 @@
 "use client";
 
 import { Sidebar, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarContent, SidebarFooter, SidebarSeparator } from "@/components/ui/sidebar";
-import { Landmark, LayoutDashboard, CreditCard, Send, HandCoins, Repeat, Power, Wallet, QrCode } from 'lucide-react';
+import { Landmark, LayoutDashboard, CreditCard, Send, HandCoins, Repeat, Power, Wallet, QrCode, Gift } from 'lucide-react';
 import type { Page } from "@/app/page";
 
 interface AppSidebarProps {
@@ -20,6 +20,7 @@ const AppSidebar = ({ navigateTo, currentPage, userBalance, bsBalance }: AppSide
         { page: 'qr', label: 'Pagos QR', icon: QrCode },
         { page: 'subasta', label: 'Subasta', icon: Repeat },
         { page: 'recargas', label: 'Recargas', icon: Wallet },
+        { page: 'referidos', label: 'Referidos', icon: Gift },
     ];
 
     return (
