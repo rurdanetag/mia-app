@@ -15,8 +15,9 @@ import PagosPage from '@/components/pagos';
 import RemesasPage from '@/components/remesas';
 import RecargasPage from '@/components/recargas';
 import Comprobante from '@/components/comprobante';
+import QrPage from '@/components/qr-page';
 
-export type Page = 'home' | 'tarjeta' | 'remesas' | 'pagos' | 'subasta' | 'comprobante' | 'recargas';
+export type Page = 'home' | 'tarjeta' | 'remesas' | 'pagos' | 'subasta' | 'comprobante' | 'recargas' | 'qr';
 
 export default function Home() {
     const [currentPage, setCurrentPage] = useState<Page>('home');
@@ -106,6 +107,8 @@ export default function Home() {
                 return <SubastaPage bcvRates={bcvRates} processTransaction={processTransaction} userBalance={userBalance} bsBalance={bsBalance} />;
             case 'recargas':
                 return <RecargasPage processTransaction={processTransaction} bsBalance={bsBalance} userBalance={userBalance}/>;
+            case 'qr':
+                return <QrPage processTransaction={processTransaction} userBalance={userBalance} bsBalance={bsBalance} />;
             case 'comprobante':
                 return <Comprobante lastTransaction={lastTransaction} navigateTo={navigateTo} />;
             case 'home':
@@ -152,7 +155,7 @@ export default function Home() {
                             onClick={() => {
                                 setShowModal(false);
                                 if (modalType === 'success' && lastTransaction) {
-                                    const pagesThatGoToReceipt = ['recargas', 'pagos', 'tarjeta', 'subasta', 'remesas'];
+                                    const pagesThatGoToReceipt = ['recargas', 'pagos', 'tarjeta', 'subasta', 'remesas', 'qr'];
                                     if (pagesThatGoToReceipt.includes(currentPage)){
                                        navigateTo('comprobante');
                                     }
