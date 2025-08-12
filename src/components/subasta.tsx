@@ -78,8 +78,9 @@ const SubastaPage = ({ processTransaction, userBalance, bsBalance, bcvRates }: S
     };
 
     const numericRate = parseFloat(rate);
-    const rateDifference = Math.abs(numericRate - bcvRates.dolar) / bcvRates.dolar;
-    const isValidRate = !isNaN(numericRate) && numericRate > 0 && rateDifference <= 0.10;
+    const minRate = bcvRates.dolar - 10;
+    const maxRate = bcvRates.dolar + 10;
+    const isValidRate = !isNaN(numericRate) && numericRate >= minRate && numericRate <= maxRate;
     const hasSufficientBs = bsBalance >= parseFloat(bsAmount || '0');
     const hasSufficientUsdt = userBalance >= parseFloat(usdtAmount || '0');
 
@@ -112,7 +113,7 @@ const SubastaPage = ({ processTransaction, userBalance, bsBalance, bcvRates }: S
                     </p>
                     {rate && !isValidRate && (
                         <p className="text-destructive text-sm mt-2">
-                           La tasa no puede desviarse más de un 10% de la tasa de referencia.
+                           La tasa debe estar entre {minRate.toFixed(2)} y {maxRate.toFixed(2)}.
                         </p>
                     )}
                 </CardContent>
